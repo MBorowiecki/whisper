@@ -10,6 +10,7 @@ const secretKeys = require('./config/secretKeys');
 
 //MongoDB Models
 const User = require('./models/user');
+const Message = require('./models/message');
 
 //App initialization
 const app = express()
@@ -110,6 +111,7 @@ app.post('/auth/local', (req, res) => {
                         }
                     })
                 }else{
+                    console.log('No acc')
                     res.status(204).json({msg: 'There is no account with this email.'})
                 }
             }
@@ -171,6 +173,8 @@ app.put('/users/:_id', (req, res) => {
         }
     });
 })
+
+//Messages operations
 
 //App start
 app.listen(port, () => {

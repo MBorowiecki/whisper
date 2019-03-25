@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-var schema = mongoose.Schema({
+let schema = mongoose.Schema({
     email:{
         type: String,
         required: true
@@ -19,9 +19,15 @@ var schema = mongoose.Schema({
     },
     avatar_url: {
         type: String
+    },
+    friends: {
+        type: Array
+    },
+    favourites: {
+        type: Array
     }
 })
 
-var User = mongoose.model('Users', schema);
+let User = mongoose.model('Users', schema);
 
 module.exports = User;
