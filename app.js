@@ -132,6 +132,17 @@ app.get('/users', (req, res) => {
     })
 })
 
+app.get('/users/:_id', (req, res) => {
+    User.find({_id: req.params._id}, (err, users) => {
+        if(err){
+            console.log(err)
+            res.status(500).send(err)
+        }else{
+            res.status(200).send(users)
+        }
+    })
+})
+
 app.put('/users/:_id', (req, res) => {
     njwt.verify(req.headers.authorization, secretKeys.jwtKey, (err,verifiedJwt) => {
         if(err){
