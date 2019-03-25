@@ -1,0 +1,29 @@
+{
+  "name": "whisper-node",
+  "version": "0.1.0",
+  "private": true,
+  "description": "It's messaging app.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Murawus/whisper.git"
+  },
+  "keywords": [
+    "whisper",
+    "message"
+  ],
+  "author": "Mateusz Borowiecki",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Murawus/whisper/issues"
+  },
+  "homepage": "https://github.com/Murawus/whisper#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "mongoose": "^5.4.20",
+    "nodemon": "^1.18.10"
+  }
+}
