@@ -16,7 +16,7 @@ const Message = require('./models/message');
 const app = express()
 
 //App port
-const port = 3000;
+const port = 1337;
 
 //Establishment of connection to MongoDB
 mongoose.connect('mongodb://' + mongoconfig.username + ':' + mongoconfig.password + '@' + mongoconfig.hostname + ':' + mongoconfig.port + '/' + mongoconfig.database, (err) => {
@@ -39,7 +39,16 @@ app.use(function(req, res, next) {
   
 });
 
+//Return React pages
+
+//Index page
+app.get('/', (req, res) => {
+    //There will be builded index page
+})
+
 //Authentication
+
+//Register user
 app.post('/auth/local/signup', (req, res) => {
     if(req.body){
         let { 
@@ -80,6 +89,7 @@ app.post('/auth/local/signup', (req, res) => {
     }
 })
 
+//Sign in user
 app.post('/auth/local', (req, res) => {
     if(req.body){
         let {
@@ -123,6 +133,8 @@ app.post('/auth/local', (req, res) => {
 })
 
 //User operations
+
+//Get users
 app.get('/users', (req, res) => {
     User.find({}, (err, users) => {
         if(err){
@@ -134,6 +146,7 @@ app.get('/users', (req, res) => {
     })
 })
 
+//Get user with specified Id
 app.get('/users/:_id', (req, res) => {
     User.find({_id: req.params._id}, (err, users) => {
         if(err){
@@ -145,6 +158,7 @@ app.get('/users/:_id', (req, res) => {
     })
 })
 
+//Update user with specified Id
 app.put('/users/:_id', (req, res) => {
     njwt.verify(req.headers.authorization, secretKeys.jwtKey, (err,verifiedJwt) => {
         if(err){
