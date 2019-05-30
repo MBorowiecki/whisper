@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Redirect } from 'react-router-dom';
 import jwt from 'jsonwebtoken';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Dialog, DialogContent, DialogActions, Button } from '@material-ui/core';
 import { Settings, Info, PowerSettingsNew } from '@material-ui/icons';
 
 //Config imports
@@ -52,6 +52,7 @@ const AvatarImage = styled.img`
     border-radius: 50%;
     width: 120px;
     height: 120px;
+    object-fit: cover;
 `
 
 const UserName = styled.div`
@@ -106,6 +107,14 @@ const LogoutIcon = styled(PowerSettingsNew)`
     color: #4B4B4B;
 `
 
+//Dialogs
+const LogoutDialogContent = styled(DialogContent)`
+    color: #ffffffdd;
+    font-size: 20px;
+    font-family: Montserrat;
+    font-weight: 500;
+`
+
 export default class Home extends React.Component{
     constructor(){
         super();
@@ -113,6 +122,7 @@ export default class Home extends React.Component{
         this.state = {
             logged: true,
             sideBarFlex: 2,
+            logoutDialog: false,
         }
     }
 
@@ -146,14 +156,11 @@ export default class Home extends React.Component{
         if(window.sessionStorage.getItem('jwt')){
             let decodedToken = jwt.decode(window.sessionStorage.getItem('jwt'), {complete: true});
             let dateNow = new Date();
-            console.log(dateNow.getTime() / 1000, decodedToken.payload.exp)
             if(decodedToken.payload.exp < dateNow.getTime() / 1000){
-                console.log(decodedToken.payload.exp < dateNow.getTime())
                 this.setState({
                     logged: false
                 })
             }else{
-                console.log(decodedToken.payload.exp < dateNow.getTime())
                 this.setState({
                     logged: true
                 })
@@ -169,6 +176,13 @@ export default class Home extends React.Component{
         window.sessionStorage.clear();
         this.setState({
             logged: false
+        })
+    }
+
+    handleChange(state){
+        //reverse passed state
+        this.setState({
+        [state]: !this.state[state]
         })
     }
 
@@ -201,7 +215,7 @@ export default class Home extends React.Component{
                         <OptionsButton>
                             <InfoIcon />
                         </OptionsButton>
-                        <OptionsButton onClick={() => this.logout()}>
+                        <OptionsButton onClick={() => this.handleChange('logoutDialog')}>
                             <LogoutIcon />
                         </OptionsButton>
                     </OptionsContainer>
@@ -209,6 +223,26 @@ export default class Home extends React.Component{
                 <MessagesContainer>
 
                 </MessagesContainer>
+
+                {/*Logout dialog*/}
+                <Dialog
+                    open={this.state.logoutDialog}
+                    onClose={() => this.handleChange('logoutDialog')}
+                    PaperProps={{
+                        style:{
+                            backgroundColor: '#000000',
+                            paddingTop: 10
+                        }
+                    }}
+                >
+                    <LogoutDialogContent>
+                        Do you really want to logout?
+                    </LogoutDialogContent>
+                    <DialogActions>
+                        <Button style={{color: '#ffffffdd', fontFamily: 'Montserrat', fontSize: 13}} onClick={() => this.handleChange('logoutDialog')}>No</Button>
+                        <Button style={{backgroundColor: '#ff0000dd', color: '#ffffffcc', fontFamily: 'Montserrat', fontSize: 15}} variant='contained' onClick={() => this.logout()}>Yes!</Button>
+                    </DialogActions>
+                </Dialog>
             </MainContainer>
         )
     }

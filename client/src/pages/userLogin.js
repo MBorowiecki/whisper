@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import adresses from '../config/adresses';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
+import { CircularProgress } from '@material-ui/core'
 
 const Logo = require('../images/logo.png');
 
@@ -94,6 +95,11 @@ const SignInButton = styled.button`
     }
 `
 
+//SignIn progress
+const SignInCircularProgress = styled(CircularProgress)`
+    
+`
+
 //SignUp button
 const SignUpButton = styled.button`
     flex: 1;
@@ -116,16 +122,18 @@ export default class userLogin extends React.Component{
         this.state = {
             email: '',
             password: '',
-            logged: false
+            logged: false,
+            logging: false
         };
     }
 
     signInUser(){
-        console.log('Logging')
+        this.setState({
+            logging: true
+        })
         axios.post(adresses.serverAdress + '/auth/local', {email: this.state.email, password: this.state.password})
         .then((res) => {
-            console.log(res.status)
-            if(res.status == 200){
+            if(res.status === 200){
                 window.sessionStorage.setItem('jwt', res.data.jwt);
                 window.sessionStorage.setItem('first_name', res.data.user.first_name)
                 window.sessionStorage.setItem('last_name', res.data.user.last_name)
@@ -135,13 +143,14 @@ export default class userLogin extends React.Component{
                 }
                 
                 this.setState({
+                    logging: false,
                     logged: true
                 })
-            }else if(res.status == 500){
+            }else if(res.status === 500){
                 console.log('Problem with server. Contact with support.')
-            }else if(res.status == 204){
+            }else if(res.status === 204){
                 console.log('No account with this email.')
-            }else if(res.status == 406){
+            }else if(res.status === 406){
                 console.log('No body.')
             }
         })
@@ -161,7 +170,7 @@ export default class userLogin extends React.Component{
             <MainContainer>
                 <SignInContainer>
                     <AppLogoContainer>
-                        <AppLogo src={Logo} alt />
+                        <AppLogo src={Logo} alt='whisper-logo' />
                     </AppLogoContainer>
                     <InputContainer>
                         <Input type='text' placeholder='E-mail' onChange={(e) => {this.setState({email: e.target.value})}}/>
@@ -171,7 +180,7 @@ export default class userLogin extends React.Component{
                     </InputContainer>
                     <ActionsContainer>
                         <SignInButton onClick={() => this.signInUser()}>
-                            Sign In
+                            {this.state.logging ? <SignInCircularProgress size={18} color='#ffffff' /> : "Sign In"}
                         </SignInButton>
                         <SignUpButton>
                             Sign Up

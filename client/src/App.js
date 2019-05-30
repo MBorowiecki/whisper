@@ -1,6 +1,5 @@
 import React from 'react';
 import { HashRouter, Route } from 'react-router-dom';
-import logo from './logo.svg';
 import './App.css';
 
 import userLogin from './pages/userLogin';
