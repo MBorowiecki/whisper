@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const njwt = require('njwt');
+const fs = require('fs');
 
 //Configs
 const mongoconfig = require('./config/mongodb');
@@ -144,6 +145,19 @@ app.get('/users', (req, res) => {
             res.status(200).send(users)
         }
     })
+})
+
+app.get('/avatar/:_name', (req, res) => {
+    if(req.params._name){
+        fs.readFile(__dirname + '/public/uploads/' + req.params._name, (err, data) => {
+            if(err){
+                console.log(err)
+                res.status(404).json({message: 'There was an error when read file.'})
+            }else{
+                res.status(200).send(data)
+            }
+        })
+    }
 })
 
 //Get user with specified Id

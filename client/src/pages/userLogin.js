@@ -1,6 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-const Logo = require('./images/logo.png');
+import adresses from '../config/adresses';
+import axios from 'axios';
+import { Redirect } from 'react-router-dom';
+
+const Logo = require('../images/logo.png');
 
 //Styled components
 
@@ -106,7 +110,53 @@ const SignUpButton = styled.button`
 `
 
 export default class userLogin extends React.Component{
+    constructor(){
+        super();
+
+        this.state = {
+            email: '',
+            password: '',
+            logged: false
+        };
+    }
+
+    signInUser(){
+        console.log('Logging')
+        axios.post(adresses.serverAdress + '/auth/local', {email: this.state.email, password: this.state.password})
+        .then((res) => {
+            console.log(res.status)
+            if(res.status == 200){
+                window.sessionStorage.setItem('jwt', res.data.jwt);
+                window.sessionStorage.setItem('first_name', res.data.user.first_name)
+                window.sessionStorage.setItem('last_name', res.data.user.last_name)
+                window.sessionStorage.setItem('email', res.data.user.email)
+                if(res.data.user.avatar_name){
+                    window.sessionStorage.setItem('avatar_name', res.data.user.avatar_name)
+                }
+                
+                this.setState({
+                    logged: true
+                })
+            }else if(res.status == 500){
+                console.log('Problem with server. Contact with support.')
+            }else if(res.status == 204){
+                console.log('No account with this email.')
+            }else if(res.status == 406){
+                console.log('No body.')
+            }
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
+
     render(){
+        if(this.state.logged){
+            return(
+                <Redirect to='/messages/home' />
+            )
+        }
+
         return(
             <MainContainer>
                 <SignInContainer>
@@ -114,13 +164,13 @@ export default class userLogin extends React.Component{
                         <AppLogo src={Logo} alt />
                     </AppLogoContainer>
                     <InputContainer>
-                        <Input type='text' placeholder='E-mail' />
+                        <Input type='text' placeholder='E-mail' onChange={(e) => {this.setState({email: e.target.value})}}/>
                     </InputContainer>
                     <InputContainer>
-                        <Input type='password' placeholder='Password' />
+                        <Input type='password' placeholder='Password' onChange={(e) => {this.setState({password: e.target.value})}} />
                     </InputContainer>
                     <ActionsContainer>
-                        <SignInButton>
+                        <SignInButton onClick={() => this.signInUser()}>
                             Sign In
                         </SignInButton>
                         <SignUpButton>

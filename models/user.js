@@ -17,7 +17,7 @@ let schema = mongoose.Schema({
         type: String,
         required: true
     },
-    avatar_url: {
+    avatar_name: {
         type: String
     },
     friends: {
