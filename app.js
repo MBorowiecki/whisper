@@ -49,7 +49,7 @@ app.get('/', (req, res) => {
 
 //Authentication
 
-//Register user
+//Sign up user
 app.post('/auth/local/signup', (req, res) => {
     if(req.body){
         let { 
@@ -118,11 +118,12 @@ app.post('/auth/local', (req, res) => {
                                 var response = {jwt: jwt, user: user}
 
                                 res.status(200).send(response);
+                            }else{
+                                res.status(204).json({message: 'Incorrect password.'})
                             }
                         }
                     })
                 }else{
-                    console.log('No acc')
                     res.status(204).json({msg: 'There is no account with this email.'})
                 }
             }
@@ -134,6 +135,20 @@ app.post('/auth/local', (req, res) => {
 })
 
 //User operations
+
+//Functions
+
+const findUser = async (id) => {
+    let foundUser = await User.findOne({_id: id}, (err, docs) => {
+        if(err){
+            console.log(err)
+        }else{
+            return docs
+        }
+    })
+
+    return foundUser;
+}
 
 //Get users
 app.get('/users', (req, res) => {
@@ -167,7 +182,9 @@ app.get('/users/:_id', (req, res) => {
             console.log(err)
             res.status(500).send(err)
         }else{
-            res.status(200).send(users)
+            let usersObject = users;
+            usersObject[0].password = '########';
+            res.status(200).send(usersObject)
         }
     })
 })

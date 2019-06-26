@@ -1,119 +1,48 @@
 //Libraries imports
 import React from 'react';
-import styled from 'styled-components';
 import { Redirect } from 'react-router-dom';
 import jwt from 'jsonwebtoken';
-import { IconButton, Dialog, DialogContent, DialogActions, Button } from '@material-ui/core';
-import { Settings, Info, PowerSettingsNew } from '@material-ui/icons';
+import { 
+    Dialog, 
+    DialogActions, 
+    Button, 
+    ListSubheader, 
+    ListItemText,
+    List,
+    ListItem,
+    ListItemAvatar,
+    Collapse,
+    ListItemSecondaryAction,
+    IconButton
+} from '@material-ui/core';
+import axios from 'axios'
+import { 
+    LogoutDialogContent, 
+    LogoutIcon, 
+    MessagesContainer, 
+    OptionsButton, 
+    OptionsContainer, 
+    AddContactIcon, 
+    SettingsIcon, 
+    ContactsContainer, 
+    ContactsItem, 
+    ContactsList, 
+    AvatarContainer, 
+    MainContainer, 
+    UserName, 
+    AvatarImage, 
+    SideBarContainer,
+    AddContactDialogTitle,
+    AddContactDialogSearchBar,
+    AddContactDialogContent,
+    AddContactDialogSearchBarContainer,
+    AddContactDialogSearchIcon,
+    AddContactDialogList,
+    AddContactNameText
+} from './styledComponents/homeComponents';
 
 //Config imports
 import adresses from '../config/adresses';
-
-//Styled components
-
-//Container with all components inside
-const MainContainer = styled.section`
-    display: flex;
-    background-color: #f7f3ed;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 100vh;
-    flex-direction: row;
-`
-
-//SideBar container with first name, last name, avatar, contacts etc.
-const SideBarContainer = styled.div`
-    display: flex;
-    flex: ${props => props.flex};
-    height: 100vh;
-    background-color: #D2D2D2;
-    flex-direction: column;
-`
-
-const MessagesContainer = styled.div`
-    display: flex;
-    flex: 10;
-    height: 100vh;
-`
-
-//User avatar container
-const AvatarContainer = styled.div`
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    margin-top: 20px;
-`
-
-//User avatar
-const AvatarImage = styled.img`
-    border-radius: 50%;
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-`
-
-const UserName = styled.div`
-    justify-content: center;
-    text-align: center;
-
-    font-size: 24px;
-    font-weight: 400;
-    font-family: Montserrat;
-    color: #494949;
-    border-bottom: .5px solid #B0B0B0;
-    padding-top: 20px;
-    padding-bottom: 20px;
-`
-
-//Contacts
-
-//Container
-const ContactsContainer = styled.div`
-    flex: 10;
-    padding: 20px;
-`
-
-//Options
-
-//Container
-const OptionsContainer = styled.div`
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-`
-
-//Universal options icon button
-const OptionsButton = styled(IconButton)`
-    flex: 1;
-    text-align: center;
-`
-
-//Icons
-const SettingsIcon = styled(Settings)`
-    color: #4B4B4B;
-`
-
-const InfoIcon = styled(Info)`
-    color: #4B4B4B;
-`
-
-const LogoutIcon = styled(PowerSettingsNew)`
-    color: #4B4B4B;
-`
-
-//Dialogs
-const LogoutDialogContent = styled(DialogContent)`
-    color: #ffffffdd;
-    font-size: 20px;
-    font-family: Montserrat;
-    font-weight: 500;
-`
 
 export default class Home extends React.Component{
     constructor(){
@@ -123,13 +52,30 @@ export default class Home extends React.Component{
             logged: true,
             sideBarFlex: 2,
             logoutDialog: false,
+            userFavourites: [],
+            userFriends: [],
+            addContactDialog: false,
+            contactToAddCredentials: '',
+            contactToAddId: 0,
+            allUsers: [],
         }
     }
 
     componentDidMount(){
+        this.getUserFriends()
         this.checkToken()
         this.updateWindowSize()
         window.addEventListener('resize', this.updateWindowSize.bind(this))
+
+        axios.get(adresses.serverAdress + '/users')
+        .then((res) => {
+            if(res.status === 200)
+                this.setState({allUsers: res.data})
+        })
+        .catch((err) => {
+            if(err)
+                console.log(err)
+        })
     }
 
     updateWindowSize(){
@@ -172,6 +118,61 @@ export default class Home extends React.Component{
         }
     }
 
+    getUserFriends(){
+        if(window.sessionStorage.getItem('jwt') && window.sessionStorage.getItem('_id')){
+            axios.get(adresses.serverAdress + '/users/' + window.sessionStorage.getItem('_id'))
+            .then((res) => {
+                if(res.status === 200){
+                    console.log(res.data)
+                    if(res.data[0].favourites.length > 0){
+                        res.data[0].favourites.map((favouriteId) => {
+                            axios.get(adresses.serverAdress + '/users/' + favouriteId._id)
+                            .then((res) => {
+                                if(res.status === 200){
+                                    let favourites = this.state.userFavourites;
+    
+                                    favourites.push(res.data);
+                                    this.setState({
+                                        userFavourites: favourites
+                                    })
+                                }
+                            })
+                            .catch((err) => {
+                                if(err){
+                                    console.log(err)
+                                }
+                            })
+                        })
+                    }
+
+                    if(res.data[0].friends.length > 0){
+                        res.data[0].friends.map((friendId) => {
+                            axios.get(adresses.serverAdress + '/users/' + friendId._id)
+                            .then((res) => {
+                                if(res.status === 200){
+                                    let friends = this.state.userFriends;
+    
+                                    friends.push(res.data[0]);
+                                    this.setState({
+                                        userFriends: friends
+                                    })
+                                }
+                            })
+                            .catch((err) => {
+                                if(err){
+                                    console.log(err)
+                                }
+                            })
+                        })
+                    }
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+        }
+    }
+
     logout(){
         window.sessionStorage.clear();
         this.setState({
@@ -206,14 +207,32 @@ export default class Home extends React.Component{
                         </UserName>
                     </AvatarContainer>
                     <ContactsContainer>
-
+                        <ContactsList>
+                            <ListSubheader>Favourites</ListSubheader>
+                            {this.state.userFavourites.length > 0 && this.state.userFavourites.map((favourite, index) => {
+                                return(
+                                    <ContactsItem key={index}>
+                                        <ListItemText>{favourite.first_name} {favourite.last_name}</ListItemText>
+                                    </ContactsItem>
+                                )
+                            })}
+                            <ListSubheader>Friends</ListSubheader>
+                            {this.state.userFriends.length > 0 && this.state.userFriends.map((friend, index) => {
+                                return(
+                                    <ContactsItem key={index}>
+                                        <ListItemText>{friend.first_name} {friend.last_name}</ListItemText>
+                                    </ContactsItem>
+                                )
+                            })}
+                            <ListSubheader>Others</ListSubheader>
+                        </ContactsList>
                     </ContactsContainer>
                     <OptionsContainer>
-                        <OptionsButton>
-                            <SettingsIcon />
+                        <OptionsButton onClick={() => this.handleChange('addContactDialog')}>
+                            <AddContactIcon />
                         </OptionsButton>
                         <OptionsButton>
-                            <InfoIcon />
+                            <SettingsIcon />
                         </OptionsButton>
                         <OptionsButton onClick={() => this.handleChange('logoutDialog')}>
                             <LogoutIcon />
@@ -242,6 +261,77 @@ export default class Home extends React.Component{
                         <Button style={{color: '#ffffffdd', fontFamily: 'Montserrat', fontSize: 13}} onClick={() => this.handleChange('logoutDialog')}>No</Button>
                         <Button style={{backgroundColor: '#ff0000dd', color: '#ffffffcc', fontFamily: 'Montserrat', fontSize: 15}} variant='contained' onClick={() => this.logout()}>Yes!</Button>
                     </DialogActions>
+                </Dialog>
+
+                {/*Add contact dialog*/}
+                <Dialog
+                    open={this.state.addContactDialog}
+                    onClose={() => this.handleChange('addContactDialog')}
+                    PaperProps={{
+                        style:{
+                            backgroundColor: '#000000',
+                        }
+                    }}
+                    maxWidth='md'
+                    fullWidth
+                    >
+                    <AddContactDialogTitle>
+                        Search for new contacts
+                    </AddContactDialogTitle>
+                    <AddContactDialogContent>
+                        <AddContactDialogSearchBarContainer>
+                            <AddContactDialogSearchIcon />
+                            <AddContactDialogSearchBar 
+                                type='text'
+                                placeholder='Search'
+                                onChange={(e) => {this.setState({contactToAddCredentials: e.target.value})}}
+                            />
+                        </AddContactDialogSearchBarContainer>
+                        <Collapse
+                            in={this.state.contactToAddCredentials.length > 0}
+                        >
+                            <AddContactDialogList>
+                                {this.state.allUsers.sort((a, b) => {return a.last_name - b.last_name}).filter((a) => {
+                                    let fullName = a.first_name.toLowerCase() + ' ' + a.last_name.toLowerCase();
+
+                                    return fullName.includes(this.state.contactToAddCredentials.toLowerCase());
+                                }).map((user) => {
+                                    let friendsCounter = 0;
+                                    this.state.userFavourites.map((contact) => {
+                                        if(contact._id === user._id){
+                                            friendsCounter++;
+                                        }
+                                    })
+
+                                    this.state.userFriends.map((contact) => {
+                                        if(contact._id === user._id){
+                                            friendsCounter++;
+                                        }
+                                    })
+
+                                    if(friendsCounter === 0){
+                                        return(
+                                            <ListItem style={{borderBottom: '1px solid #ffffff11'}} button>
+                                                {user.avatar_name ? <ListItemAvatar><img src={adresses.serverAdress + '/avatar/' + user.avatar_name}  style={{width: 50, height: 50}} /></ListItemAvatar> : <ListItemAvatar><img src={adresses.serverAdress + '/avatar/x.png'} style={{width: 50, height: 50}} /></ListItemAvatar>}
+                                                <AddContactNameText primaryTypographyProps={{
+                                                    style:{
+                                                        fontFamily: 'Montserrat',
+                                                        fontSize: 18,
+                                                        fontWeight: 300
+                                                    }
+                                                }}>{user.first_name} {user.last_name}</AddContactNameText>
+                                                <ListItemSecondaryAction>
+                                                    <IconButton>
+                                                        <AddContactIcon color='#ffffffbb' />
+                                                    </IconButton>
+                                                </ListItemSecondaryAction>
+                                            </ListItem>
+                                        )
+                                    }
+                                })}
+                            </AddContactDialogList>
+                        </Collapse>
+                    </AddContactDialogContent>
                 </Dialog>
             </MainContainer>
         )
