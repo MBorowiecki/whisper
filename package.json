@@ -24,7 +24,7 @@
   "dependencies": {
     "bcrypt": "^3.0.6",
     "express": "^4.16.4",
-    "mongoose": "^5.4.20",
+    "mongoose": "^5.7.5",
     "njwt": "^1.0.0",
     "nodemon": "^1.18.10"
   }
